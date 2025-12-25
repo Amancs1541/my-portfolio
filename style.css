@@ -1,0 +1,90 @@
+:root {
+    --primary: #FF5722;
+    --dark: #121212;
+    --light: #ffffff;
+    --gray: #f8f8f8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+body { font-family: 'Space Mono', monospace; background: white; color: var(--dark); line-height: 1.6; }
+
+/* Responsive Navbar */
+header {
+    position: fixed; top: 0; width: 100%; height: 90px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 5%; z-index: 1000; transition: 0.4s ease;
+}
+header.scrolled {
+    background: rgba(255, 255, 255, 0.9);
+    height: 70px; backdrop-filter: blur(10px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+.logo { font-family: 'Playfair Display', serif; font-size: 2rem; color: white; transition: 0.3s; }
+header.scrolled .logo { color: var(--dark); }
+.logo span { color: var(--primary); }
+
+.nav-links { display: flex; list-style: none; align-items: center; }
+.nav-links li a { 
+    text-decoration: none; color: white; margin-left: 30px; 
+    font-size: 0.8rem; font-weight: bold; text-transform: uppercase; transition: 0.3s;
+}
+header.scrolled .nav-links li a { color: var(--dark); }
+.nav-links li a:hover { color: var(--primary); }
+.nav-cta { background: var(--primary); color: white !important; padding: 10px 20px; border-radius: 4px; }
+
+/* Hero Section with Parallax Look */
+.hero {
+    height: 100vh;
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2070');
+    background-size: cover; background-position: center; background-attachment: fixed;
+    display: flex; align-items: center; justify-content: center; color: white; text-align: center;
+}
+.hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 5rem); }
+.hero h1 span { color: var(--primary); }
+.hero p { max-width: 700px; margin: 20px auto 40px; font-size: 1.1rem; color: #ccc; }
+
+.btn { padding: 15px 30px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px; transition: 0.3s; }
+.primary { background: var(--primary); color: white; }
+.secondary { border: 2px solid white; color: white; }
+
+/* Sections & Grids */
+.section { padding: 100px 10%; }
+.container { max-width: 1100px; margin: 0 auto; }
+.section-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 50px; text-align: center; }
+.gray-bg { background: var(--gray); }
+
+.timeline { border-left: 2px solid var(--primary); padding-left: 30px; }
+.timeline-item { position: relative; margin-bottom: 40px; }
+.timeline-item::before {
+    content: ''; position: absolute; left: -39px; top: 5px;
+    width: 15px; height: 15px; background: var(--primary); border-radius: 50%;
+}
+.timeline-item .date { color: var(--primary); font-weight: bold; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+.card { background: white; padding: 30px; border: 1px solid #eee; transition: 0.3s; }
+.card:hover { transform: translateY(-5px); border-color: var(--primary); }
+.tag { color: var(--primary); font-size: 0.8rem; font-weight: bold; }
+.detail-list { padding-left: 20px; margin-top: 15px; font-size: 0.9rem; }
+
+/* Footer */
+.main-footer { background: var(--dark); color: white; padding: 80px 10% 30px; }
+.footer-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; }
+.footer-contact a { display: block; color: #ccc; text-decoration: none; margin-bottom: 10px; }
+.icon-links a { color: white; font-size: 1.5rem; margin-right: 20px; transition: 0.3s; }
+.icon-links a:hover { color: var(--primary); }
+
+/* Mobile Menu */
+.hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+.hamburger span { width: 25px; height: 2px; background: white; transition: 0.3s; }
+header.scrolled .hamburger span { background: var(--dark); }
+
+@media (max-width: 768px) {
+    .hamburger { display: flex; }
+    .nav-links {
+        position: fixed; top: 0; right: -100%; height: 100vh; width: 80%;
+        background: white; flex-direction: column; justify-content: center; transition: 0.4s;
+    }
+    .nav-links.active { right: 0; }
+    .nav-links li a { color: var(--dark); margin: 15px 0; font-size: 1.2rem; }
+}
