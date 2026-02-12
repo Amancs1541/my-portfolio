@@ -35,6 +35,24 @@
         header.scrolled .logo { color: var(--dark); }
         .logo span { color: var(--primary); }
 
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: white;
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+        header.scrolled .menu-toggle span {
+            background: var(--dark);
+        }
+
         .nav-links { display: flex; list-style: none; }
         .nav-links li a { 
             text-decoration: none; color: white; margin-left: 30px; 
@@ -49,6 +67,7 @@
             background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), 
                         url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070') center/cover no-repeat fixed;
             display: flex; align-items: center; justify-content: center; color: white; text-align: center;
+            padding: 0 20px;
         }
         .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 5rem); }
         .hero h1 span { color: var(--primary); }
@@ -100,9 +119,124 @@
         .footer-links a { color: white; font-size: 1.8rem; margin-left: 20px; transition: 0.3s; }
         .footer-links a:hover { color: var(--primary); }
 
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .section { padding: 80px 7%; }
+            .section-title { font-size: 2.4rem; margin-bottom: 50px; }
+            .grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        }
+
         @media (max-width: 768px) {
+            /* Mobile Navigation */
+            .menu-toggle { display: flex; }
+            
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                max-width: 300px;
+                height: 100vh;
+                background: rgba(18, 18, 18, 0.98);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: 0.4s;
+                padding: 20px;
+            }
+            
+            .nav-links.active {
+                right: 0;
+            }
+            
+            .nav-links li {
+                margin: 20px 0;
+            }
+            
+            .nav-links li a {
+                margin: 0;
+                font-size: 1rem;
+                color: white !important;
+            }
+            
+            header.scrolled .nav-links li a {
+                color: white !important;
+            }
+
+            /* Sections */
+            .section { padding: 60px 5%; }
+            .section-title { font-size: 2rem; margin-bottom: 40px; }
+            
+            /* Hero */
+            .hero {
+                background-attachment: scroll;
+            }
+            .hero h1 { font-size: clamp(2rem, 10vw, 3rem); }
+            .hero p { font-size: 1rem; padding: 0 10px; }
+            
+            /* Timeline */
+            .timeline { padding-left: 25px; }
+            .timeline-item::before { left: -34px; }
+            .timeline-item h3 { font-size: 1.1rem; }
+            
+            /* Cards */
+            .grid { grid-template-columns: 1fr; gap: 20px; }
+            .card { padding: 30px 25px; }
+            .card div[style*="height: 200px"] {
+                margin: -30px -25px 20px -25px !important;
+                height: 180px !important;
+            }
+            
+            /* Skills */
+            .skills-container { grid-template-columns: 1fr; gap: 20px; }
+            .skill-box h3 { font-size: 1.2rem; }
+            
+            /* Form */
             .input-row { grid-template-columns: 1fr; }
+            .form-container { padding: 30px 20px; }
+            
+            /* Languages */
             .lang-flex { flex-direction: column; }
+            .lang-card { min-width: 100%; }
+            
+            /* Footer */
+            footer { padding: 40px 5%; text-align: center; }
+            .footer-grid { flex-direction: column; text-align: center; }
+            .footer-links a { margin: 0 10px; font-size: 1.5rem; }
+            
+            /* Image Grid */
+            section.gray-bg div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr 1fr !important;
+            }
+            section.gray-bg div[style*="height: 300px"] {
+                height: 200px !important;
+                font-size: 1.5rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo { font-size: 1.5rem; }
+            .section { padding: 50px 5%; }
+            .section-title { font-size: 1.8rem; }
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 0.9rem; }
+            .btn { padding: 15px 30px; font-size: 0.85rem; }
+            .card { padding: 25px 20px; }
+            .form-container { padding: 25px 15px; }
+            input, textarea { padding: 15px; font-size: 0.9rem; }
+            
+            /* Image Grid - Stack to single column on very small screens */
+            section.gray-bg div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .footer-links a { font-size: 1.3rem; margin: 0 8px; }
+        }
+
+        /* Smooth scrolling for iOS */
+        @supports (-webkit-overflow-scrolling: touch) {
+            body { -webkit-overflow-scrolling: touch; }
         }
     </style>
 </head>
@@ -110,10 +244,16 @@
 
     <header id="navbar">
         <div class="logo">VARMA<span>.</span></div>
-        <ul class="nav-links">
+        <div class="menu-toggle" id="menuToggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <ul class="nav-links" id="navLinks">
             <li><a href="#home">Home</a></li>
             <li><a href="#education">Education</a></li>
-            <li><a href="#experience">Experience</a></li> <li><a href="#skills">Skills</a></li>
+            <li><a href="#experience">Experience</a></li>
+            <li><a href="#skills">Skills</a></li>
             <li><a href="#projects">Work</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
@@ -176,6 +316,7 @@
             </div>
         </div>
     </section>
+
     <section id="experience" class="section">
         <div class="container">
             <h2 class="section-title">Professional Experience</h2>
@@ -238,7 +379,7 @@
                     <span class="tag">Python/Flask [2025]</span>
                     <h3>PhishIntel - Analyzer</h3>
                     <p>Developed a Web Application which can analyze the phishing .eml file, for any kind of suspicious email and it is using the NLP pre-trained model, Heuristic and TI integration and evaluation done based on these three methods.</p>
-                    <div class="card-links" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; display: flex; gap: 15px;">
+                    <div class="card-links" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; display: flex; gap: 15px; flex-wrap: wrap;">
                         <a href="https://medium.com/@amanvarma.clover/phishintel-analyzer-project-for-detecting-phishing-emails-8cef009f7450" target="_blank" style="text-decoration: none; color: var(--primary); font-weight: bold; font-size: 0.75rem;">
                             <i class="fab fa-medium"></i> READ ON MEDIUM
                         </a>
@@ -264,7 +405,7 @@
                 </div>
 
                 <div class="card">
-                    <div style="width: 100%; height: 200px; background: url(powerBU.png) center/cover; margin: -40px -40px 20px -40px; border-radius: 0;"></div>
+                    <div style="width: 100%; height: 200px; background: url('powerBU.png') center/cover; margin: -40px -40px 20px -40px; border-radius: 0;"></div>
                     <span class="tag">Power BI</span>
                     <h3>PowerBI Incident Response Dashboard</h3>
                     <p>Power BI dashboard for incident response management using simulated dataset of 1,000 IT incidents across multiple countries and office locations. Enables IT teams to track, analyze, and visualize incident data for informed decision-making.</p>
@@ -327,10 +468,49 @@
                 <a href="https://linkedin.com/in/aman-" target="_blank"><i class="fab fa-linkedin"></i></a>
                 <a href="https://medium.com/" target="_blank"><i class="fab fa-medium"></i></a>
                 <a href="https://github.com/yourusername" target="_blank">
-                            <i class="fab fa-github"></i> 
-                        </a>
+                    <i class="fab fa-github"></i> 
+                </a>
             </div>
         </div>
     </footer>
 
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        menuToggle.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', function() {
+                navLinks.classList.remove('active');
+            });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const isClickInsideNav = navLinks.contains(event.target);
+            const isClickOnToggle = menuToggle.contains(event.target);
+            
+            if (!isClickInsideNav && !isClickOnToggle && navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+            }
+        });
+    </script>
+
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+</body>
+</html>
