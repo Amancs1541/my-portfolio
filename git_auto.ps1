@@ -3,18 +3,18 @@ param(
     [string]$CommitMessage = ""
 )
 
-# ----------- Color Functions -----------
+# ---------- Color Functions ----------
 function Write-Success { Write-Host $args[0] -ForegroundColor Green }
 function Write-Info    { Write-Host $args[0] -ForegroundColor Cyan }
 function Write-Warn    { Write-Host $args[0] -ForegroundColor Yellow }
 function Write-Err     { Write-Host $args[0] -ForegroundColor Red }
 
 Clear-Host
-Write-Info "========== Git Automation Script =========="
+Write-Info "=========== Git Automation Script ==========="
 Write-Host ""
 
-# ----------- Check Git Installation -----------
-Write-Info "[1] Checking Git..."
+# ---------- Check Git ----------
+Write-Info "[1] Checking Git installation..."
 try {
     git --version | Out-Null
 }
@@ -25,13 +25,20 @@ catch {
 Write-Success "Git is installed."
 Write-Host ""
 
-# ----------- Set Working Directory -----------
+# ---------- Working Directory ----------
+Write-Info "[2] Setting working directory..."
+
 if (-not $Directory) {
     $Directory = Get-Location
+    Write-Info "Current directory: $Directory"
+    $dirChoice = Read-Host "Use this directory? (Y/N) [Y]"
+    if ($dirChoice -match "^[Nn]") {
+        $Directory = Read-Host "Enter full path"
+    }
 }
 
 if (-not (Test-Path $Directory)) {
-    Write-Err "Directory not found: $Directory"
+    Write-Err "Directory not found."
     exit 1
 }
 
@@ -39,8 +46,8 @@ Set-Location $Directory
 Write-Success "Using directory: $Directory"
 Write-Host ""
 
-# ----------- Initialize Repo if Needed -----------
-Write-Info "[2] Checking repository..."
+# ---------- Initialize Repo ----------
+Write-Info "[3] Checking repository..."
 git rev-parse --git-dir 2>$null | Out-Null
 
 if ($LASTEXITCODE -ne 0) {
@@ -49,7 +56,7 @@ if ($LASTEXITCODE -ne 0) {
     if ($initChoice -notmatch "^[Nn]") {
         git init | Out-Null
         git branch -M main | Out-Null
-        Write-Success "Repository initialized."
+        Write-Success "Repository initialized with branch 'main'."
     }
     else {
         Write-Err "Cannot continue without repository."
@@ -59,18 +66,16 @@ if ($LASTEXITCODE -ne 0) {
 else {
     Write-Success "Repository exists."
 }
-
 Write-Host ""
 
-# ----------- Stage Changes -----------
-Write-Info "[3] Checking changes..."
+# ---------- Stage & Commit ----------
+Write-Info "[4] Checking for changes..."
 $status = git status --porcelain
 
 if ($status) {
     git add .
     Write-Success "Changes staged."
 
-    # Ask for commit message if not provided
     if (-not $CommitMessage) {
         $defaultMsg = "Update: $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
         $inputMsg = Read-Host "Enter commit message [$defaultMsg]"
@@ -83,6 +88,7 @@ if ($status) {
     }
 
     git commit -m "$CommitMessage"
+
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Commit created: $CommitMessage"
     }
@@ -94,11 +100,10 @@ if ($status) {
 else {
     Write-Info "No changes to commit."
 }
-
 Write-Host ""
 
-# ----------- Check Remote -----------
-Write-Info "[4] Checking remote..."
+# ---------- Remote Configuration ----------
+Write-Info "[5] Checking remote..."
 $remoteUrl = git remote get-url origin 2>$null
 
 if (-not $remoteUrl) {
@@ -117,29 +122,65 @@ if (-not $remoteUrl) {
         }
     }
     else {
-        Write-Err "Remote URL required to push."
+        Write-Err "Remote URL required."
         exit 1
     }
 }
 else {
-    Write-Success "Remote exists: $remoteUrl"
+    Write-Success "Remote found: $remoteUrl"
+}
+Write-Host ""
+
+# ---------- Branch Selection ----------
+Write-Info "[6] Branch selection..."
+
+$currentBranch = git rev-parse --abbrev-ref HEAD
+Write-Info "Current branch: $currentBranch"
+
+$branchChoice = Read-Host "Enter branch to push (default: main)"
+
+if (-not $branchChoice) {
+    $branchChoice = "main"
+}
+
+# Check if branch exists
+git show-ref --verify --quiet refs/heads/$branchChoice
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Warn "Branch '$branchChoice' does not exist."
+    $createChoice = Read-Host "Create and switch to '$branchChoice'? (Y/N) [Y]"
+
+    if ($createChoice -notmatch "^[Nn]") {
+        git checkout -b $branchChoice
+        Write-Success "Switched to new branch: $branchChoice"
+    }
+    else {
+        Write-Err "Cannot continue without valid branch."
+        exit 1
+    }
+}
+else {
+    git checkout $branchChoice
+    Write-Success "Switched to branch: $branchChoice"
 }
 
 Write-Host ""
 
-# ----------- Push to Remote -----------
-Write-Info "[5] Pushing to remote..."
-$currentBranch = git rev-parse --abbrev-ref HEAD
+# ---------- Confirm Push ----------
+$confirmPush = Read-Host "Push to '$branchChoice'? (Y/N) [Y]"
 
-git push -u origin $currentBranch
+if ($confirmPush -notmatch "^[Nn]") {
 
-if ($LASTEXITCODE -ne 0) {
-    Write-Warn "Push failed. Attempting pull --rebase..."
-    git pull origin $currentBranch --rebase
-    git push -u origin $currentBranch
+    git push -u origin $branchChoice
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warn "Push failed. Attempting pull --rebase..."
+        git pull origin $branchChoice --rebase
+        git push -u origin $branchChoice
+    }
 
     if ($LASTEXITCODE -eq 0) {
-        Write-Success "Push successful after rebase."
+        Write-Success "Push successful to $branchChoice"
     }
     else {
         Write-Err "Push failed. Manual intervention required."
@@ -147,12 +188,12 @@ if ($LASTEXITCODE -ne 0) {
     }
 }
 else {
-    Write-Success "Push successful."
+    Write-Info "Push cancelled."
 }
 
 Write-Host ""
-Write-Success "============= Completed ============="
+Write-Success "=========== Completed Successfully ==========="
 Write-Info "Directory : $Directory"
-Write-Info "Branch    : $currentBranch"
+Write-Info "Branch    : $branchChoice"
 Write-Info "Remote    : $remoteUrl"
 Write-Host ""
